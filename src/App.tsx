@@ -14,15 +14,18 @@ import {
   Eye, 
   ShoppingBag, 
   MessageCircle,
-  HelpCircle,
   CheckCircle2,
-  Phone
+  PackageCheck,
+  Ruler,
+  RotateCcw,
+  Tag
 } from 'lucide-react';
-import { MOCK_PRODUCTS } from './data/mockProducts';
+import { MOCK_PRODUCTS, FABRICS, SIZES } from './data/mockProducts';
 import { Product, CartItem, ProductVariation, Review, OrderDetails } from './types';
 import { Header } from './components/Header';
 import { ProductCard } from './components/ProductCard';
 import { ProductDetailModal } from './components/ProductDetailModal';
+import { SizeGuideModal } from './components/SizeGuideModal';
 import { CartDrawer } from './components/CartDrawer';
 import { CheckoutModal } from './components/CheckoutModal';
 import { SellerChatModal } from './components/SellerChatModal';
@@ -30,19 +33,22 @@ import { ReviewModal } from './components/ReviewModal';
 import { UxArchitectureModal } from './components/UxArchitectureModal';
 import { AllReviewsSection } from './components/AllReviewsSection';
 import { Footer } from './components/Footer';
-import { formatCurrency, generateWhatsAppLink } from './utils/formatters';
+import { formatCurrency } from './utils/formatters';
 
 export default function App() {
   // Products state (allows appending new reviews, questions, etc.)
   const [products, setProducts] = useState<Product[]>(MOCK_PRODUCTS);
 
-  // Search, category and sorting
+  // Search, category, fabric and size filtering
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('Todos os Anúncios');
+  const [selectedCategory, setSelectedCategory] = useState('Todos os Modelos');
+  const [selectedFabric, setSelectedFabric] = useState('Todos os Tecidos');
+  const [selectedSizeFilter, setSelectedSizeFilter] = useState('Todos');
   const [sortBy, setSortBy] = useState<'featured' | 'price-asc' | 'price-desc' | 'rating'>('featured');
 
   // Modals & Panels State
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [chatProduct, setChatProduct] = useState<Product | null>(null);
@@ -51,7 +57,7 @@ export default function App() {
 
   // Cart & Favorites State
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [favorites, setFavorites] = useState<Set<string>>(new Set(['fone-anc-premium']));
+  const [favorites, setFavorites] = useState<Set<string>>(new Set(['conjunto-renda-francesa-aro', 'body-renda-tule-decote-v']));
   const [orderHistory, setOrderHistory] = useState<OrderDetails[]>([]);
 
   // Notification toast state
@@ -115,7 +121,7 @@ export default function App() {
       }
     });
 
-    showToast(`"${product.title.slice(0, 30)}..." adicionado ao carrinho!`);
+    showToast(`"${product.title.slice(0, 30)}..." adicionado à sua sacola!`);
     setIsCartOpen(true);
   };
 
@@ -146,7 +152,7 @@ export default function App() {
 
   const handleRemoveCartItem = (index: number) => {
     setCartItems((prev) => prev.filter((_, i) => i !== index));
-    showToast('Item removido do carrinho.');
+    showToast('Item removido da sacola.');
   };
 
   // Submit review handler
@@ -178,7 +184,6 @@ export default function App() {
       })
     );
 
-    // Also update selectedProduct if open
     setSelectedProduct((curr) => {
       if (curr && curr.id === productId) {
         const updatedReviews = [newRev, ...curr.reviews];
@@ -202,7 +207,7 @@ export default function App() {
     const newQ = {
       id: `q-${Date.now()}`,
       question: questionText,
-      author: 'Comprador Interessado',
+      author: 'Cliente Interessada',
       date: 'Hoje',
     };
 
@@ -240,14 +245,27 @@ export default function App() {
     return products
       .filter((p) => {
         const matchesCategory =
-          selectedCategory === 'Todos os Anúncios' || p.category === selectedCategory;
+          selectedCategory === 'Todos os Modelos' ||
+          selectedCategory === 'Todos os Anúncios' ||
+          p.category === selectedCategory;
+
+        const matchesFabric =
+          selectedFabric === 'Todos os Tecidos' ||
+          p.fabric.toLowerCase().includes(selectedFabric.toLowerCase());
+
+        const matchesSize =
+          selectedSizeFilter === 'Todos' ||
+          p.variations.sizes?.some((s) => s.name.startsWith(selectedSizeFilter));
+
         const matchesSearch =
           !searchQuery.trim() ||
           p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
           p.subtitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
           p.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.fabric.toLowerCase().includes(searchQuery.toLowerCase()) ||
           p.description.toLowerCase().includes(searchQuery.toLowerCase());
-        return matchesCategory && matchesSearch;
+
+        return matchesCategory && matchesFabric && matchesSize && matchesSearch;
       })
       .sort((a, b) => {
         if (sortBy === 'price-asc') return a.price - b.price;
@@ -255,7 +273,7 @@ export default function App() {
         if (sortBy === 'rating') return b.rating - a.rating;
         return (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0);
       });
-  }, [products, searchQuery, selectedCategory, sortBy]);
+  }, [products, searchQuery, selectedCategory, selectedFabric, selectedSizeFilter, sortBy]);
 
   // Featured product for banner showcase
   const featuredProduct = products.find((p) => p.isFeatured) || products[0];
@@ -263,11 +281,11 @@ export default function App() {
   const totalCartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <div className="min-h-screen bg-stone-50 text-stone-900 flex flex-col font-sans selection:bg-emerald-100 selection:text-emerald-900">
+    <div className="min-h-screen bg-stone-50 text-stone-900 flex flex-col font-sans selection:bg-rose-100 selection:text-rose-900">
       {/* Toast notification */}
       {toastMessage && (
         <div className="fixed bottom-5 right-5 z-50 bg-stone-900 text-white px-4 py-2.5 rounded-2xl shadow-xl text-xs font-semibold flex items-center gap-2 border border-stone-700 animate-fadeIn">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+          <CheckCircle2 className="w-4 h-4 text-rose-400" />
           <span>{toastMessage}</span>
         </div>
       )}
@@ -278,6 +296,11 @@ export default function App() {
         onSearchChange={setSearchQuery}
         selectedCategory={selectedCategory}
         onSelectCategory={setSelectedCategory}
+        selectedFabric={selectedFabric}
+        onSelectFabric={setSelectedFabric}
+        selectedSize={selectedSizeFilter}
+        onSelectSize={setSelectedSizeFilter}
+        onOpenSizeGuide={() => setIsSizeGuideOpen(true)}
         cartCount={totalCartCount}
         onOpenCart={() => setIsCartOpen(true)}
         favoritesCount={favorites.size}
@@ -288,14 +311,19 @@ export default function App() {
       />
 
       {/* Hero Showcase Section */}
-      {selectedCategory === 'Todos os Anúncios' && !searchQuery && (
+      {(selectedCategory === 'Todos os Modelos' || selectedCategory === 'Todos os Anúncios') && !searchQuery && selectedFabric === 'Todos os Tecidos' && selectedSizeFilter === 'Todos' && (
         <section className="bg-stone-900 text-white py-10 sm:py-14 px-4 sm:px-6 lg:px-8 border-b border-stone-800">
           <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             {/* Left Hero Content */}
             <div className="lg:col-span-7 space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-stone-800 text-emerald-400 border border-stone-700 text-xs font-semibold">
-                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                <span>Anúncio em Destaque Especial</span>
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-stone-800 text-rose-300 border border-stone-700 text-xs font-semibold">
+                  <Sparkles className="w-3.5 h-3.5 text-rose-400" />
+                  <span>Destaque Exclusivo do Ateliê</span>
+                </div>
+                <span className="px-2.5 py-0.5 rounded-full bg-stone-800 text-amber-300 text-xs font-bold border border-stone-700">
+                  Valores de R$ 59,90 a R$ 79,90
+                </span>
               </div>
 
               <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight text-stone-100">
@@ -305,6 +333,23 @@ export default function App() {
               <p className="text-sm sm:text-base text-stone-300 max-w-2xl leading-relaxed">
                 {featuredProduct.subtitle}
               </p>
+
+              {/* Fabric and Size badging in hero */}
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                <span className="px-3 py-1 bg-stone-800/90 text-stone-200 text-xs font-semibold rounded-lg border border-stone-700">
+                  Tecido: <strong className="text-rose-300">{featuredProduct.fabric}</strong>
+                </span>
+                <span className="px-3 py-1 bg-stone-800/90 text-stone-200 text-xs font-semibold rounded-lg border border-stone-700">
+                  Tamanhos Disponíveis: <strong className="text-white">P • M • G • GG</strong>
+                </span>
+                <button
+                  onClick={() => setIsSizeGuideOpen(true)}
+                  className="text-xs text-rose-400 hover:text-rose-300 underline font-semibold flex items-center gap-1"
+                >
+                  <Ruler className="w-3.5 h-3.5" />
+                  Ver Guia de Medidas
+                </button>
+              </div>
 
               {/* Price & Installments highlight */}
               <div className="flex flex-wrap items-baseline gap-3 pt-2">
@@ -316,13 +361,13 @@ export default function App() {
                     {formatCurrency(featuredProduct.originalPrice)}
                   </span>
                 )}
-                <span className="px-2.5 py-1 text-xs font-bold bg-emerald-700 text-white rounded-md">
-                  Frete Grátis com Seguro
+                <span className="px-2.5 py-1 text-xs font-bold bg-rose-900 text-rose-100 rounded-md">
+                  Frete Grátis com Embalagem Discreta
                 </span>
               </div>
 
               <p className="text-xs text-stone-400">
-                ou em até {featuredProduct.installments.count}x de {formatCurrency(featuredProduct.installments.value)} sem juros no cartão
+                ou em até {featuredProduct.installments.count}x de {formatCurrency(featuredProduct.installments.value)} sem juros no cartão ou 5% no Pix
               </p>
 
               {/* Hero Action Buttons */}
@@ -330,18 +375,18 @@ export default function App() {
                 <button
                   id="btn-hero-view-product"
                   onClick={() => setSelectedProduct(featuredProduct)}
-                  className="px-6 py-3 bg-emerald-700 hover:bg-emerald-800 text-white text-xs sm:text-sm font-bold rounded-2xl shadow-md transition-all flex items-center gap-2"
+                  className="px-6 py-3 bg-rose-700 hover:bg-rose-800 text-white text-xs sm:text-sm font-bold rounded-2xl shadow-md transition-all flex items-center gap-2"
                 >
                   <Eye className="w-4 h-4" />
-                  <span>Ver Anúncio com Múltiplas Fotos & Zoom</span>
+                  <span>Ver Anúncio com Fotos & Zoom HD</span>
                 </button>
 
                 <button
                   onClick={() => handleAddToCart(featuredProduct)}
                   className="px-5 py-3 bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs sm:text-sm font-semibold rounded-2xl border border-stone-700 transition-all flex items-center gap-2"
                 >
-                  <ShoppingBag className="w-4 h-4 text-amber-400" />
-                  <span>Comprar Agora</span>
+                  <ShoppingBag className="w-4 h-4 text-rose-400" />
+                  <span>Adicionar à Sacola</span>
                 </button>
 
                 <button
@@ -354,18 +399,18 @@ export default function App() {
               </div>
 
               {/* Hero Trust Micro-features */}
-              <div className="grid grid-cols-3 gap-3 pt-6 border-t border-stone-800/80 text-stone-400 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-6 border-t border-stone-800/80 text-stone-400 text-xs">
                 <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span>Garantia de 12 meses com NF-e</span>
+                  <PackageCheck className="w-4 h-4 text-rose-400 shrink-0" />
+                  <span>Embalagem 100% Discreta</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Truck className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span>Despacho em até 24h úteis</span>
+                  <ShieldCheck className="w-4 h-4 text-rose-400 shrink-0" />
+                  <span>Forro 100% Algodão Puro</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
-                  <span>Fotos 100% Reais com Zoom</span>
+                  <RotateCcw className="w-4 h-4 text-rose-400 shrink-0" />
+                  <span>Troca Fácil e Rápida de Tamanho</span>
                 </div>
               </div>
             </div>
@@ -381,9 +426,9 @@ export default function App() {
                   alt={featuredProduct.title}
                   className="w-full aspect-4/3 object-cover group-hover:scale-105 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-stone-950/80 via-transparent to-transparent flex flex-col justify-end p-5">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 mb-1">
-                    Galeria com {featuredProduct.images.length} fotos em alta definição
+                <div className="absolute inset-0 bg-gradient-to-t from-stone-950/85 via-transparent to-transparent flex flex-col justify-end p-5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-rose-300 mb-1">
+                    Tecido {featuredProduct.fabric} • Galeria com {featuredProduct.images.length} fotos reais
                   </span>
                   <p className="text-xs text-white font-medium line-clamp-2">
                     {featuredProduct.images[0].caption}
@@ -397,18 +442,74 @@ export default function App() {
 
       {/* Main Catalog View */}
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        {/* Catalog Header Bar with Counter & Sort Selector */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-4 border-b border-stone-200">
+        {/* Lingerie Specifications & Price Highlights Banner */}
+        <div className="mb-8 p-4 sm:p-5 rounded-3xl bg-white border border-stone-200/90 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="p-1.5 rounded-lg bg-rose-50 text-rose-700">
+                <Tag className="w-4 h-4" />
+              </span>
+              <span className="text-xs font-bold uppercase tracking-wider text-stone-700">
+                Catálogo Especial de Lingerie
+              </span>
+              <span className="text-xs font-black text-rose-700 bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-200">
+                R$ 59,90 a R$ 79,90
+              </span>
+            </div>
+            <p className="text-xs text-stone-600">
+              Confeccionadas em <strong>Renda Francesa</strong>, <strong>Poliamida Confort</strong> e <strong>Cetim com Toque de Seda</strong>. Todos os modelos disponíveis nos tamanhos <strong>P (38/40), M (42), G (44) e GG (46)</strong>.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2.5 shrink-0">
+            <button
+              onClick={() => setIsSizeGuideOpen(true)}
+              className="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-semibold rounded-xl border border-stone-200 transition-colors flex items-center gap-1.5"
+            >
+              <Ruler className="w-3.5 h-3.5 text-rose-600" />
+              <span>Tabela de Medidas (P, M, G, GG)</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Active Filter Indicators & Ordering */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-stone-200">
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-stone-900 tracking-tight">
-              {selectedCategory}
-            </h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl sm:text-2xl font-bold text-stone-900 tracking-tight">
+                {selectedCategory}
+              </h2>
+              {selectedFabric !== 'Todos os Tecidos' && (
+                <span className="px-2.5 py-0.5 rounded-md bg-stone-900 text-white text-xs font-bold">
+                  {selectedFabric}
+                </span>
+              )}
+              {selectedSizeFilter !== 'Todos' && (
+                <span className="px-2.5 py-0.5 rounded-md bg-rose-700 text-white text-xs font-bold">
+                  Tam: {selectedSizeFilter}
+                </span>
+              )}
+            </div>
             <p className="text-xs text-stone-500 mt-0.5">
-              {filteredProducts.length} {filteredProducts.length === 1 ? 'anúncio encontrado' : 'anúncios encontrados'} com qualidades detalhadas
+              {filteredProducts.length} {filteredProducts.length === 1 ? 'modelo encontrado' : 'modelos encontrados'} com descrição técnica de tecidos e fotos em alta resolução
             </p>
           </div>
 
           <div className="flex items-center gap-3">
+            {(selectedCategory !== 'Todos os Modelos' || selectedFabric !== 'Todos os Tecidos' || selectedSizeFilter !== 'Todos' || searchQuery) && (
+              <button
+                onClick={() => {
+                  setSelectedCategory('Todos os Modelos');
+                  setSelectedFabric('Todos os Tecidos');
+                  setSelectedSizeFilter('Todos');
+                  setSearchQuery('');
+                }}
+                className="text-xs text-stone-600 hover:text-stone-900 font-semibold underline cursor-pointer"
+              >
+                Limpar Filtros
+              </button>
+            )}
+
             <div className="flex items-center gap-2 text-xs text-stone-600 bg-white border border-stone-200 rounded-xl px-3 py-2 shadow-2xs">
               <ArrowUpDown className="w-3.5 h-3.5 text-stone-400" />
               <span className="font-semibold text-stone-700">Ordenar:</span>
@@ -418,8 +519,8 @@ export default function App() {
                 className="bg-transparent text-stone-800 font-medium focus:outline-none cursor-pointer"
               >
                 <option value="featured">Relevância / Destaques</option>
-                <option value="price-asc">Menor Preço</option>
-                <option value="price-desc">Maior Preço</option>
+                <option value="price-asc">Menor Preço (R$ 59,90...)</option>
+                <option value="price-desc">Maior Preço (R$ 79,90...)</option>
                 <option value="rating">Mais Bem Avaliados</option>
               </select>
             </div>
@@ -433,19 +534,21 @@ export default function App() {
               <Search className="w-8 h-8" />
             </div>
             <h3 className="text-base font-bold text-stone-800">
-              Nenhum produto encontrado
+              Nenhuma lingerie encontrada com os filtros selecionados
             </h3>
             <p className="text-xs text-stone-500 max-w-sm mx-auto">
-              Não encontramos nenhum anúncio correspondente a "{searchQuery}". Tente usar termos mais genéricos ou selecionar outra categoria.
+              Experimente remover filtros de tecido ou tamanho para ver toda a nossa coleção de peças entre R$ 59,90 e R$ 79,90.
             </p>
             <button
               onClick={() => {
                 setSearchQuery('');
-                setSelectedCategory('Todos os Anúncios');
+                setSelectedCategory('Todos os Modelos');
+                setSelectedFabric('Todos os Tecidos');
+                setSelectedSizeFilter('Todos');
               }}
               className="mt-2 px-5 py-2.5 bg-stone-900 text-white rounded-xl text-xs font-semibold hover:bg-stone-800 transition-colors"
             >
-              Ver todos os anúncios
+              Ver todos os modelos
             </button>
           </div>
         ) : (
@@ -487,10 +590,17 @@ export default function App() {
           onOpenSellerChat={(p) => setChatProduct(p)}
           onOpenReviewModal={(p) => setReviewProduct(p)}
           onAddQuestion={handleAddQuestion}
+          onOpenSizeGuide={() => setIsSizeGuideOpen(true)}
         />
       )}
 
-      {/* 2. Cart Drawer */}
+      {/* 2. Size & Fabric Guide Modal */}
+      <SizeGuideModal
+        isOpen={isSizeGuideOpen}
+        onClose={() => setIsSizeGuideOpen(false)}
+      />
+
+      {/* 3. Cart Drawer */}
       <CartDrawer
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
@@ -503,7 +613,7 @@ export default function App() {
         }}
       />
 
-      {/* 3. Checkout Modal */}
+      {/* 4. Checkout Modal */}
       <CheckoutModal
         isOpen={isCheckoutOpen}
         onClose={() => setIsCheckoutOpen(false)}
@@ -511,7 +621,7 @@ export default function App() {
         onOrderSuccess={handleOrderSuccess}
       />
 
-      {/* 4. Seller Chat Modal */}
+      {/* 5. Seller Chat Modal */}
       {chatProduct && (
         <SellerChatModal
           product={chatProduct}
@@ -519,7 +629,7 @@ export default function App() {
         />
       )}
 
-      {/* 5. Review Submission Modal */}
+      {/* 6. Review Submission Modal */}
       {reviewProduct && (
         <ReviewModal
           product={reviewProduct}
@@ -528,7 +638,7 @@ export default function App() {
         />
       )}
 
-      {/* 6. UX Architecture Guide Modal */}
+      {/* 7. UX Architecture Guide Modal */}
       <UxArchitectureModal
         isOpen={isUxGuideOpen}
         onClose={() => setIsUxGuideOpen(false)}

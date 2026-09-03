@@ -61,6 +61,8 @@ export interface Product {
   title: string;
   subtitle: string;
   category: string;
+  fabric: 'Renda' | 'Poliamida' | 'Cetim' | 'Renda e Poliamida' | 'Cetim e Renda';
+  fabricDescription?: string;
   price: number;
   originalPrice?: number;
   discountPercentage?: number;

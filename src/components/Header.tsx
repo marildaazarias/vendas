@@ -7,15 +7,22 @@ import {
   ShieldCheck, 
   MessageSquareQuote, 
   SlidersHorizontal,
-  X
+  Ruler,
+  X,
+  PackageCheck
 } from 'lucide-react';
-import { CATEGORIES } from '../data/mockProducts';
+import { CATEGORIES, FABRICS, SIZES } from '../data/mockProducts';
 
 interface HeaderProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
   selectedCategory: string;
   onSelectCategory: (category: string) => void;
+  selectedFabric: string;
+  onSelectFabric: (fabric: string) => void;
+  selectedSize: string;
+  onSelectSize: (size: string) => void;
+  onOpenSizeGuide: () => void;
   cartCount: number;
   onOpenCart: () => void;
   favoritesCount: number;
@@ -28,6 +35,11 @@ export const Header: React.FC<HeaderProps> = ({
   onSearchChange,
   selectedCategory,
   onSelectCategory,
+  selectedFabric,
+  onSelectFabric,
+  selectedSize,
+  onSelectSize,
+  onOpenSizeGuide,
   cartCount,
   onOpenCart,
   favoritesCount,
@@ -36,25 +48,39 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   return (
     <header className="sticky top-0 z-40 bg-stone-50/95 backdrop-blur-md border-b border-stone-200/80 transition-all">
-      {/* Top Banner: Trust & Value Proposition */}
+      {/* Top Banner: Trust, Price Range & Lingerie Value Proposition */}
       <div className="bg-stone-900 text-stone-300 text-xs py-1.5 px-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1.5 font-medium text-emerald-400">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              Compra 100% Segura & Garantia de Entrega
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-[11px] sm:text-xs">
+            <span className="flex items-center gap-1.5 font-bold text-rose-300">
+              <PackageCheck className="w-3.5 h-3.5 text-rose-400" />
+              Embalagem 100% Discreta & Confidencial
             </span>
-            <span className="hidden sm:inline text-stone-500">•</span>
-            <span className="hidden sm:inline">Frete Grátis em anúncios selecionados</span>
+            <span className="hidden md:inline text-stone-600">•</span>
+            <span className="hidden md:inline text-amber-300 font-semibold">
+              Valores promocionais de R$ 59,90 a R$ 79,90
+            </span>
+            <span className="hidden md:inline text-stone-600">•</span>
+            <span className="hidden sm:inline text-stone-400">
+              Tecidos: Renda, Poliamida e Cetim (P ao GG)
+            </span>
           </div>
 
-          <div className="flex items-center gap-4 text-xs">
+          <div className="flex items-center gap-3 text-[11px] sm:text-xs">
+            <button
+              onClick={onOpenSizeGuide}
+              className="hover:text-amber-300 transition-colors flex items-center gap-1 font-semibold text-amber-400"
+            >
+              <Ruler className="w-3.5 h-3.5" />
+              <span>Tabela P, M, G, GG</span>
+            </button>
+            <span className="text-stone-600">|</span>
             <button
               onClick={onOpenUxGuide}
               className="hover:text-white transition-colors flex items-center gap-1 font-medium text-stone-300 underline underline-offset-4 decoration-stone-600 hover:decoration-white"
             >
               <Sparkles className="w-3 h-3 text-amber-400" />
-              Arquitetura & UX do Site
+              <span>Conceito UX</span>
             </button>
             <span className="text-stone-600">|</span>
             <button
@@ -62,7 +88,7 @@ export const Header: React.FC<HeaderProps> = ({
               className="hover:text-white transition-colors flex items-center gap-1 text-stone-300"
             >
               <MessageSquareQuote className="w-3 h-3 text-stone-400" />
-              Avaliações & Depoimentos
+              <span>Depoimentos</span>
             </button>
           </div>
         </div>
@@ -75,20 +101,22 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex items-center gap-3">
             <button 
               onClick={() => {
-                onSelectCategory('Todos os Anúncios');
+                onSelectCategory('Todos os Modelos');
+                onSelectFabric('Todos os Tecidos');
+                onSelectSize('Todos');
                 onSearchChange('');
               }}
               className="flex items-center gap-2.5 text-left group"
             >
               <div className="w-10 h-10 rounded-xl bg-stone-900 flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
-                <ShoppingBag className="w-5 h-5 text-amber-400" />
+                <ShoppingBag className="w-5 h-5 text-rose-400" />
               </div>
               <div>
                 <span className="block text-xl font-bold tracking-tight text-stone-900 leading-none">
-                  Vitrine<span className="text-emerald-700">.</span>
+                  Vitrine<span className="text-rose-600">.</span>
                 </span>
-                <span className="text-[11px] font-medium text-stone-600 uppercase tracking-wider">
-                  Anúncios Selecionados
+                <span className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">
+                  Ateliê & Lingerie Fina
                 </span>
               </div>
             </button>
@@ -101,8 +129,8 @@ export const Header: React.FC<HeaderProps> = ({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
-                placeholder="Buscar por fones, relógios, cafeteiras, mochilas..."
-                className="w-full bg-white border border-stone-300 rounded-full pl-11 pr-10 py-2.5 text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-700/20 focus:border-emerald-700 transition-all shadow-xs"
+                placeholder="Buscar conjuntos em renda, baby doll de cetim, bodies de poliamida..."
+                className="w-full bg-white border border-stone-300 rounded-full pl-11 pr-10 py-2.5 text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-900/10 focus:border-stone-800 transition-all shadow-2xs"
               />
               <Search className="w-4 h-4 text-stone-400 absolute left-4 top-1/2 -translate-y-1/2" />
               {searchQuery && (
@@ -119,15 +147,14 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Action Icons */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* UX Guide Button for quick review */}
+            {/* Size Chart Button */}
             <button
-              id="btn-ux-guide"
-              onClick={onOpenUxGuide}
-              className="hidden lg:flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-stone-100 hover:bg-stone-200/80 text-stone-700 border border-stone-200 transition-all"
-              title="Ver detalhes da arquitetura de UX e decisões de design"
+              onClick={onOpenSizeGuide}
+              className="hidden lg:flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl bg-stone-100 hover:bg-stone-200/80 text-stone-800 border border-stone-200 transition-all"
+              title="Ver tabela de medidas para tamanhos P, M, G, GG"
             >
-              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-              <span>Conceito UX</span>
+              <Ruler className="w-3.5 h-3.5 text-rose-500" />
+              <span>Tabela P, M, G, GG</span>
             </button>
 
             {/* Favorites */}
@@ -155,7 +182,7 @@ export const Header: React.FC<HeaderProps> = ({
               <div className="relative">
                 <ShoppingBag className="w-4 h-4" />
                 {cartCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-emerald-500 text-stone-950 text-[10px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center">
+                  <span className="absolute -top-2 -right-2 bg-rose-500 text-white text-[10px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center">
                     {cartCount}
                   </span>
                 )}
@@ -172,8 +199,8 @@ export const Header: React.FC<HeaderProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="Buscar produtos anunciados..."
-              className="w-full bg-white border border-stone-300 rounded-full pl-10 pr-9 py-2 text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-700/20 focus:border-emerald-700"
+              placeholder="Buscar em renda, cetim, poliamida..."
+              className="w-full bg-white border border-stone-300 rounded-full pl-10 pr-9 py-2 text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-900/10 focus:border-stone-800"
             />
             <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             {searchQuery && (
@@ -188,30 +215,79 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* Categories Horizontal Bar */}
-      <div className="border-t border-stone-200/70 bg-stone-100/60 overflow-x-auto scrollbar-none py-2 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto flex items-center gap-2">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-stone-600 mr-2 shrink-0">
-            <SlidersHorizontal className="w-3.5 h-3.5" />
-            <span>Categorias:</span>
-          </div>
-          <div className="flex items-center gap-1.5 shrink-0">
+      {/* Filter Navigation Bar: Categories, Fabrics & Sizes */}
+      <div className="border-t border-stone-200/80 bg-stone-100/70 overflow-x-auto scrollbar-none py-2 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+          {/* Categories */}
+          <div className="flex items-center gap-1.5 shrink-0 overflow-x-auto">
+            <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider mr-1">
+              Modelos:
+            </span>
             {CATEGORIES.map((cat) => {
               const isActive = selectedCategory === cat;
               return (
                 <button
                   key={cat}
                   onClick={() => onSelectCategory(cat)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+                  className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
                     isActive
-                      ? 'bg-stone-900 text-white shadow-xs'
-                      : 'bg-white text-stone-600 hover:bg-stone-200/70 border border-stone-200'
+                      ? 'bg-stone-900 text-white shadow-xs font-semibold'
+                      : 'bg-white text-stone-700 hover:bg-stone-200/80 border border-stone-200'
                   }`}
                 >
                   {cat}
                 </button>
               );
             })}
+          </div>
+
+          {/* Quick Fabric & Size Pill Filters */}
+          <div className="flex items-center gap-3 shrink-0">
+            {/* Fabric Pills */}
+            <div className="flex items-center gap-1">
+              <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider">
+                Tecido:
+              </span>
+              {FABRICS.map((fabric) => {
+                const isActive = selectedFabric === fabric;
+                return (
+                  <button
+                    key={fabric}
+                    onClick={() => onSelectFabric(fabric)}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
+                      isActive
+                        ? 'bg-rose-900 text-white shadow-xs'
+                        : 'bg-white text-stone-600 hover:bg-stone-200/70 border border-stone-200'
+                    }`}
+                  >
+                    {fabric}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Size Pills */}
+            <div className="flex items-center gap-1">
+              <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider">
+                Tam:
+              </span>
+              {['Todos', ...SIZES].map((sz) => {
+                const isActive = selectedSize === sz;
+                return (
+                  <button
+                    key={sz}
+                    onClick={() => onSelectSize(sz)}
+                    className={`w-7 h-7 rounded-lg text-xs font-bold transition-all flex items-center justify-center ${
+                      isActive
+                        ? 'bg-stone-900 text-white shadow-xs'
+                        : 'bg-white text-stone-700 hover:bg-stone-200/70 border border-stone-200'
+                    }`}
+                  >
+                    {sz}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>

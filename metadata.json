@@ -1,6 +1,6 @@
 {
   "name": "Vitrine & Vendas - Anúncios de Produtos",
-  "description": "Plataforma de anúncios de produtos com galeria com zoom, variações, sistema de pedidos, contato direto com vendedores e avaliações completas.",
+  "description": "Plataforma de anúncios de lingerie em tecidos Renda, Poliamida e Cetim, nos tamanhos P, M, G e GG com valores de R$ 59,90 a R$ 79,90.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

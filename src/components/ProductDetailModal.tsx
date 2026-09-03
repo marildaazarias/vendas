@@ -15,7 +15,8 @@ import {
   ExternalLink,
   ChevronRight,
   Info,
-  Clock
+  Clock,
+  Ruler
 } from 'lucide-react';
 import { Product, ProductVariation } from '../types';
 import { ProductImageGallery } from './ProductImageGallery';
@@ -29,6 +30,7 @@ interface ProductDetailModalProps {
   onOpenSellerChat: (product: Product) => void;
   onOpenReviewModal: (product: Product) => void;
   onAddQuestion: (productId: string, questionText: string) => void;
+  onOpenSizeGuide?: () => void;
 }
 
 export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
@@ -39,6 +41,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   onOpenSellerChat,
   onOpenReviewModal,
   onAddQuestion,
+  onOpenSizeGuide,
 }) => {
   const [selectedColor, setSelectedColor] = useState<ProductVariation | undefined>(
     product.variations.colors?.[0]
@@ -125,15 +128,15 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-stone-100 text-stone-600">
                 <div className="flex items-center gap-2 text-xs">
                   <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0" />
-                  <span>{product.warrantyMonths} meses de garantia</span>
+                  <span>Embalagem 100% Discreta</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs">
                   <RotateCcw className="w-4 h-4 text-emerald-700 shrink-0" />
-                  <span>7 dias para devolução grátis</span>
+                  <span>Troca Fácil de Tamanho</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs">
                   <Truck className="w-4 h-4 text-emerald-700 shrink-0" />
-                  <span>Envio com seguro total</span>
+                  <span>Envio Rápido e Seguro</span>
                 </div>
               </div>
             </div>
@@ -198,6 +201,27 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                   </div>
                 </div>
 
+                {/* Lingerie Fabric & Composition Banner */}
+                <div className="p-3.5 rounded-2xl bg-stone-100/80 border border-stone-200/90 mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-semibold text-stone-500 uppercase tracking-wider">Tecido Principal:</span>
+                      <span className="text-xs font-extrabold text-stone-900 bg-white px-2.5 py-0.5 rounded-md border border-stone-200 shadow-2xs">
+                        {product.fabric}
+                      </span>
+                    </div>
+                    {product.fabricDescription && (
+                      <p className="text-[11px] text-stone-600 mt-1 leading-snug">
+                        {product.fabricDescription}
+                      </p>
+                    )}
+                  </div>
+                  <div className="shrink-0 flex items-center gap-1.5 text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200/80">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
+                    <span>Forro 100% Algodão Puro</span>
+                  </div>
+                </div>
+
                 {/* Variations: Colors */}
                 {product.variations.colors && product.variations.colors.length > 0 && (
                   <div className="mb-5">
@@ -232,40 +256,48 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                   </div>
                 )}
 
-                {/* Variations: Editions / Sizes / Capacities */}
+                {/* Variations: Sizes P, M, G, GG with Size Chart Button */}
                 {product.variations.sizes && product.variations.sizes.length > 0 && (
                   <div className="mb-5">
                     <div className="flex items-center justify-between text-xs font-semibold text-stone-700 mb-2.5">
-                      <span>Versão / Modelo: <strong className="text-stone-900">{selectedSize?.name || 'Selecione'}</strong></span>
+                      <span>Tamanho selecionado: <strong className="text-stone-900">{selectedSize?.name || 'Selecione'}</strong></span>
+                      {onOpenSizeGuide && (
+                        <button
+                          type="button"
+                          onClick={onOpenSizeGuide}
+                          className="flex items-center gap-1 text-xs text-rose-600 hover:text-rose-700 font-semibold hover:underline cursor-pointer"
+                        >
+                          <Ruler className="w-3.5 h-3.5" />
+                          <span>Tabela de Medidas (P, M, G, GG)</span>
+                        </button>
+                      )}
                     </div>
-                    <div className="flex flex-col sm:flex-row gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       {product.variations.sizes.map((size) => {
                         const isSelected = selectedSize?.id === size.id;
                         return (
                           <button
                             key={size.id}
                             onClick={() => setSelectedSize(size)}
-                            className={`flex-1 p-3 rounded-xl text-left border transition-all ${
+                            className={`p-2.5 rounded-xl text-center border transition-all ${
                               isSelected
-                                ? 'border-emerald-700 ring-2 ring-emerald-700/20 bg-emerald-50/50 text-stone-900 shadow-xs'
-                                : 'border-stone-200 hover:border-stone-300 bg-white text-stone-700'
+                                ? 'border-stone-900 ring-2 ring-stone-900/20 bg-stone-900 text-white shadow-xs'
+                                : 'border-stone-200 hover:border-stone-300 bg-white text-stone-800'
                             }`}
                           >
-                            <div className="flex items-center justify-between text-xs font-semibold">
-                              <span>{size.name}</span>
-                              {size.extraPrice ? (
-                                <span className="text-emerald-800 font-bold text-[11px]">
-                                  +{formatCurrency(size.extraPrice)}
-                                </span>
-                              ) : (
-                                <span className="text-stone-600 text-[11px]">Incluso</span>
-                              )}
-                            </div>
-                            <span className="text-[11px] text-stone-600 block mt-0.5">{size.value}</span>
+                            <span className="block text-sm font-black">{size.name.split(' ')[0]}</span>
+                            <span className={`block text-[10px] mt-0.5 truncate ${isSelected ? 'text-stone-300' : 'text-stone-500'}`}>
+                              {size.name.includes('(') ? size.name.split('(')[1].replace(')', '') : size.name}
+                            </span>
                           </button>
                         );
                       })}
                     </div>
+                    {selectedSize && (
+                      <p className="text-[11px] text-stone-500 mt-2 bg-stone-50 px-2.5 py-1 rounded-md border border-stone-200/60 inline-block">
+                        📐 Medidas recomendadas: <strong>{selectedSize.value}</strong>
+                      </p>
+                    )}
                   </div>
                 )}
 

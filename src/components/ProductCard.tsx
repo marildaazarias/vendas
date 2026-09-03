@@ -121,13 +121,45 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </h3>
 
           {/* Rating & Social Proof */}
-          <div className="flex items-center gap-1.5 mb-3">
+          <div className="flex items-center gap-1.5 mb-2.5">
             <div className="flex items-center text-amber-500">
               <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
             </div>
             <span className="text-xs font-bold text-stone-800">{product.rating}</span>
             <span className="text-xs text-stone-600">({product.reviewsCount} avaliações)</span>
           </div>
+
+          {/* Lingerie Fabric Badge & Size Indicator */}
+          <div className="flex flex-wrap items-center gap-1.5 mb-2.5">
+            <span className="px-2 py-0.5 rounded-md bg-stone-100 border border-stone-200 text-[10px] font-bold text-stone-800">
+              Tecido: {product.fabric}
+            </span>
+            <span className="text-[10px] text-stone-600 font-medium">
+              Tam: <strong>P • M • G • GG</strong>
+            </span>
+          </div>
+
+          {/* Available Colors Swatches Preview */}
+          {product.variations.colors && product.variations.colors.length > 0 && (
+            <div className="flex items-center gap-1.5 mb-3">
+              <span className="text-[10px] text-stone-600 font-medium">Cores:</span>
+              <div className="flex items-center gap-1">
+                {product.variations.colors.slice(0, 5).map((c) => (
+                  <span
+                    key={c.id}
+                    title={c.name}
+                    className="w-3 h-3 rounded-full border border-stone-300 shadow-2xs"
+                    style={{ backgroundColor: c.colorHex || '#ddd' }}
+                  />
+                ))}
+                {product.variations.colors.length > 5 && (
+                  <span className="text-[9px] text-stone-600 font-bold">
+                    +{product.variations.colors.length - 5}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Key Quality Feature Badge */}
           {product.qualities[0] && (
