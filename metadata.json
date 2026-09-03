@@ -1,0 +1,6 @@
+{
+  "name": "Vitrine & Vendas - Anúncios de Produtos",
+  "description": "Plataforma de anúncios de produtos com galeria com zoom, variações, sistema de pedidos, contato direto com vendedores e avaliações completas.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
