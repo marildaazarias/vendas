@@ -39,7 +39,7 @@ export const UploadPhotoModal: React.FC<UploadPhotoModalProps> = ({
   const [subtitle, setSubtitle] = useState('');
   const [fabric, setFabric] = useState('Renda');
   const [category, setCategory] = useState('Conjuntos em Renda');
-  const [price, setPrice] = useState<number>(69.90);
+  const [price, setPrice] = useState<number>(83.90);
   const [selectedSizes, setSelectedSizes] = useState<string[]>(['P', 'M', 'G', 'GG']);
   const [colorName, setColorName] = useState('Rosa Floral');
 
@@ -87,7 +87,7 @@ export const UploadPhotoModal: React.FC<UploadPhotoModalProps> = ({
     // Creating new product
     const sizeVariations: ProductVariation[] = selectedSizes.map((sz) => ({
       id: `s-${sz.toLowerCase()}`,
-      name: `${sz} (${sz === 'P' ? '38/40' : sz === 'M' ? '42' : sz === 'G' ? '44' : '46/48'})`,
+      name: `${sz} (${sz === 'P' ? '36' : sz === 'M' ? '42' : sz === 'G' ? '44' : '46/48'})`,
       type: 'size',
       value: `Tamanho padrão ${sz}`,
       inStock: true,
@@ -100,12 +100,12 @@ export const UploadPhotoModal: React.FC<UploadPhotoModalProps> = ({
       category: category,
       fabric: fabric,
       fabricDescription: `${fabric} macia com elastano e forro íntimo 100% algodão natural.`,
-      price: Number(price) || 69.90,
-      originalPrice: Number(price) ? Number((Number(price) * 1.3).toFixed(2)) : 89.90,
+      price: Number(price) || 83.90,
+      originalPrice: Number(price) ? Number((Number(price) * 1.3).toFixed(2)) : 107.90,
       discountPercentage: 23,
       installments: {
         count: 3,
-        value: Number(((Number(price) || 69.90) / 3).toFixed(2)),
+        value: Number(((Number(price) || 83.90) / 3).toFixed(2)),
         interestFree: true,
       },
       images: [
@@ -357,10 +357,10 @@ export const UploadPhotoModal: React.FC<UploadPhotoModalProps> = ({
                 {/* Price */}
                 <div>
                   <label className="block text-xs font-bold text-stone-800 mb-1">
-                    Preço (R$ 59,90 a R$ 79,90):
+                    Preço (R$ 71,90 a R$ 95,90):
                   </label>
                   <div className="flex gap-1.5 mb-1.5">
-                    {[59.90, 64.90, 69.90, 74.90, 79.90].map((val) => (
+                    {[71.90, 77.90, 83.90, 89.90, 95.90].map((val) => (
                       <button
                         key={val}
                         type="button"
@@ -379,7 +379,7 @@ export const UploadPhotoModal: React.FC<UploadPhotoModalProps> = ({
                     type="number"
                     step="0.10"
                     value={price}
-                    onChange={(e) => setPrice(parseFloat(e.target.value) || 69.90)}
+                    onChange={(e) => setPrice(parseFloat(e.target.value) || 83.90)}
                     className="w-full bg-white border border-stone-300 rounded-xl px-3 py-1.5 text-xs text-stone-800"
                   />
                 </div>

@@ -65,7 +65,7 @@ export const Header: React.FC<HeaderProps> = ({
             </span>
             <span className="hidden md:inline text-stone-600">•</span>
             <span className="hidden md:inline text-amber-300 font-semibold">
-              Valores promocionais de R$ 59,90 a R$ 79,90
+              Valores promocionais de R$ 71,90 a R$ 95,90
             </span>
             <span className="hidden md:inline text-stone-600">•</span>
             <span className="hidden sm:inline text-stone-400">
