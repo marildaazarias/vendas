@@ -9,9 +9,10 @@ import {
   SlidersHorizontal,
   Ruler,
   X,
-  PackageCheck
+  PackageCheck,
+  Upload
 } from 'lucide-react';
-import { CATEGORIES, FABRICS, SIZES } from '../data/mockProducts';
+import { CATEGORIES, FABRICS, SIZES, COLOR_FILTERS } from '../data/mockProducts';
 
 interface HeaderProps {
   searchQuery: string;
@@ -22,12 +23,15 @@ interface HeaderProps {
   onSelectFabric: (fabric: string) => void;
   selectedSize: string;
   onSelectSize: (size: string) => void;
+  selectedColor: string;
+  onSelectColor: (color: string) => void;
   onOpenSizeGuide: () => void;
   cartCount: number;
   onOpenCart: () => void;
   favoritesCount: number;
   onOpenUxGuide: () => void;
   onOpenGeneralReviews: () => void;
+  onOpenUploadModal: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -39,12 +43,15 @@ export const Header: React.FC<HeaderProps> = ({
   onSelectFabric,
   selectedSize,
   onSelectSize,
+  selectedColor,
+  onSelectColor,
   onOpenSizeGuide,
   cartCount,
   onOpenCart,
   favoritesCount,
   onOpenUxGuide,
   onOpenGeneralReviews,
+  onOpenUploadModal,
 }) => {
   return (
     <header className="sticky top-0 z-40 bg-stone-50/95 backdrop-blur-md border-b border-stone-200/80 transition-all">
@@ -67,6 +74,15 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           <div className="flex items-center gap-3 text-[11px] sm:text-xs">
+            <button
+              onClick={onOpenUploadModal}
+              className="hover:text-rose-200 transition-colors flex items-center gap-1 font-bold text-rose-300"
+              title="Colocar fotos do seu computador ou celular no site"
+            >
+              <Upload className="w-3.5 h-3.5 text-rose-400" />
+              <span>Inserir Minhas Fotos</span>
+            </button>
+            <span className="text-stone-600">|</span>
             <button
               onClick={onOpenSizeGuide}
               className="hover:text-amber-300 transition-colors flex items-center gap-1 font-semibold text-amber-400"
@@ -147,6 +163,17 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Action Icons */}
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Upload My Photos Button */}
+            <button
+              onClick={onOpenUploadModal}
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200/90 shadow-2xs transition-all hover:scale-[1.02] active:scale-[0.98]"
+              title="Carregar fotos de lingerie do seu computador ou celular"
+            >
+              <Upload className="w-3.5 h-3.5 text-rose-600" />
+              <span className="hidden sm:inline">Inserir Minhas Fotos</span>
+              <span className="sm:hidden">Fotos</span>
+            </button>
+
             {/* Size Chart Button */}
             <button
               onClick={onOpenSizeGuide}
@@ -241,8 +268,40 @@ export const Header: React.FC<HeaderProps> = ({
             })}
           </div>
 
-          {/* Quick Fabric & Size Pill Filters */}
-          <div className="flex items-center gap-3 shrink-0">
+          {/* Quick Color, Fabric & Size Pill Filters */}
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            {/* Color Pills */}
+            <div className="flex items-center gap-1">
+              <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider">
+                Cores:
+              </span>
+              <div className="flex items-center gap-1 overflow-x-auto">
+                {COLOR_FILTERS.map((color) => {
+                  const isActive = selectedColor === color.value;
+                  return (
+                    <button
+                      key={color.value}
+                      onClick={() => onSelectColor(color.value)}
+                      className={`px-2 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${
+                        isActive
+                          ? 'bg-stone-900 text-white shadow-xs'
+                          : 'bg-white text-stone-700 hover:bg-stone-200/70 border border-stone-200'
+                      }`}
+                      title={color.label}
+                    >
+                      {color.hex && (
+                        <span
+                          className="w-2.5 h-2.5 rounded-full border border-stone-300 shrink-0"
+                          style={{ backgroundColor: color.hex }}
+                        />
+                      )}
+                      <span>{color.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             {/* Fabric Pills */}
             <div className="flex items-center gap-1">
               <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider">

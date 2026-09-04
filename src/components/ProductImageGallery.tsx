@@ -93,6 +93,7 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
           <img
             src={activeImage.url}
             alt={activeImage.alt || productTitle}
+            referrerPolicy="no-referrer"
             className={`w-full h-full object-cover transition-transform duration-150 ${
               isZooming ? 'opacity-0' : 'opacity-100'
             }`}
@@ -211,6 +212,7 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
             <img
               src={activeImage.url}
               alt={activeImage.alt}
+              referrerPolicy="no-referrer"
               className="max-h-[75vh] max-w-full object-contain rounded-xl shadow-2xl"
             />
 
